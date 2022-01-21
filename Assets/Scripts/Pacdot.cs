@@ -1,32 +1,37 @@
 ﻿using UnityEngine;
 
-public class Pacdot : MonoBehaviour
+namespace Assets.Scripts
 {
-    GameObject _highscoreGameObject;
-    private Highscore _highscore;
-
-    private void Start()
+    public class Pacdot : MonoBehaviour
     {
-        _highscoreGameObject = GameObject.Find("highscore");
-        _highscore = _highscoreGameObject.GetComponent<Highscore>();
-        Invoke("CheckEnergizers", 0.1f);
-    }
+        private Highscore _highscore;
 
-    private void OnTriggerEnter2D(Object component)
-    {
-        if (component.name != "pacman") return;
-        Destroy(gameObject);
-        _highscore.DotEaten();
-    }
-
-    private void CheckEnergizers()
-    {
-        var energizers = GameObject.FindGameObjectsWithTag("energizer");
-        foreach (var energizer in energizers)
+        private void Start()
         {
-            if (energizer.transform.position == transform.position)
+            _highscore = GameObject.Find("highscore").GetComponent<Highscore>();
+            Invoke(nameof(CheckEnergizers), 0.1f);
+        }
+
+        private void OnTriggerEnter2D(Object component)
+        {
+            if (component.name != "pacman")
             {
-                Destroy(gameObject);
+                return;
+            }
+
+            Destroy(gameObject);
+            _highscore.AddScore(10);
+        }
+
+        private void CheckEnergizers()
+        {
+            GameObject[] energizers = GameObject.FindGameObjectsWithTag("energizer");
+            foreach (GameObject energizer in energizers)
+            {
+                if (energizer.transform.position == transform.position)
+                {
+                    Destroy(gameObject);
+                }
             }
         }
     }

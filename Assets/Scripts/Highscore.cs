@@ -1,61 +1,73 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class Highscore : MonoBehaviour
+namespace Assets.Scripts
 {
-    private int _score;
-    private int _dotsEaten;
-    private int _energizersEaten;
-    public Text HighscoreText;
-    public AudioSource Chomp;
-    public AudioSource Win;
-    private bool _win;
-
-    private void Start()
+    public class Highscore : MonoBehaviour
     {
-        _score = 0;
-        _dotsEaten = 0;
-        _energizersEaten = 0;
-        HighscoreText.text = "HIGH SCORE " + _score;
-        _win = false;
-    }
+        private int _score;
+        private int _energizersCount;
+        private int _pacdotsCount;
 
-    private void Update()
-    {
-        _score += _dotsEaten * 10 + _energizersEaten * 50;
-        if (GameObject.FindGameObjectsWithTag("energizer").Length +
-            GameObject.FindGameObjectsWithTag("pacdot").Length == 0)
+        [SerializeField] private Text _highscoreText;
+
+        [SerializeField] private AudioSource chompSound;
+        [SerializeField] private AudioSource winSound;
+
+        private bool _win;
+
+        private void Start()
         {
-            HighscoreText.text = "YOU WIN!";
-            if (_win) return;
+            _score = 0;
+            _energizersCount = GameObject.FindGameObjectsWithTag("energizer").Length;
+            _pacdotsCount = GameObject.FindGameObjectsWithTag("pacdot").Length - _energizersCount;
+
+            _highscoreText.text = "HIGH SCORE " + _score;
+
+            _win = false;
+        }
+
+        private void Update()
+        {
+            if (_win)
+            {
+                return;
+            }
+
+            if (_energizersCount + _pacdotsCount > 0)
+            {
+                return;
+            }
+
+            _highscoreText.text = "YOU WIN!";
             _win = true;
-            Win.Play();
+            winSound.Play();
+            Time.timeScale = 0;
         }
-        else
+
+        public void AddScore(int score)
         {
-            _dotsEaten = 0;
-            _energizersEaten = 0;
-            HighscoreText.text = "HIGH SCORE " + _score;
+            if (score == 50)
+            {
+                --_energizersCount;
+            }
+            else
+            {
+                --_pacdotsCount;
+            }
+
+            _score += score;
+            _highscoreText.text = "HIGH SCORE " + _score;
+
+            PlayChomp();
         }
-    }
 
-    public void DotEaten()
-    {
-        _dotsEaten += 1;
-        PlayChomp();
-    }
-
-    public void EnergizerEaten()
-    {
-        _energizersEaten += 1;
-        PlayChomp();
-    }
-
-    private void PlayChomp()
-    {
-        if (!Chomp.isPlaying)
+        private void PlayChomp()
         {
-            Chomp.Play();
+            if (!chompSound.isPlaying)
+            {
+                chompSound.Play();
+            }
         }
     }
 }

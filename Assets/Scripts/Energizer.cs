@@ -1,28 +1,36 @@
 ﻿using UnityEngine;
 
-public class Energizer : MonoBehaviour
+namespace Assets.Scripts
 {
-    private GameObject _highscoreGameObject;
-    private Highscore _highscore;
-
-    private void Start()
+    public class Energizer : MonoBehaviour
     {
-        _highscoreGameObject = GameObject.Find("highscore");
-        _highscore = _highscoreGameObject.GetComponent<Highscore>();
-    }
+        private Highscore _highscore;
 
-    private void OnTriggerEnter2D(Object component)
-    {
-        if (component.name != "pacman") return;
-        Destroy(gameObject);
-        _highscore.EnergizerEaten();
-        var ghosts = FindObjectsOfType<GhostMove>();
-        foreach (var ghost in ghosts)
+        [SerializeField] private Ghost[] _ghosts;
+
+        private void Start()
         {
-            ghost.State = GhostMove.States.Frightened;
-            ghost.Timer = 6;
-            ghost.GetComponent<SpriteRenderer>().sprite = ghost.Fright;
-            ghost.GetComponent<Animator>().enabled = false;
+            _highscore = GameObject.Find("highscore").GetComponent<Highscore>();
+        }
+
+        private void OnTriggerEnter2D(Object component)
+        {
+            if (component.name != "pacman")
+            {
+                return;
+            }
+
+            Destroy(gameObject);
+
+            _highscore.AddScore(50);
+
+            foreach (Ghost ghost in _ghosts)
+            {
+                if (ghost.gameObject.activeInHierarchy)
+                {
+                    ghost.TurnFrightened();
+                }
+            }
         }
     }
 }
